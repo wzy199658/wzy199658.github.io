@@ -50,13 +50,12 @@ where p.BusinessEntityID=e.BusinessEntityID
 ![picture](http://t2.qpic.cn/mblogpic/63383e1385d04f6457da/460)
 <pre>
 关于左连接和右连接：
-左连接where只影向右表，右连接where只影响左表。
 Left Join
-select * from tbl1 Left Join tbl2 where tbl1.ID = tbl2.ID
+select * from tbl1 Left Join tbl2 on tbl1.ID = tbl2.ID
 左连接后的检索结果是显示tbl1的所有数据和tbl2中满足where 条件的数据。
 简言之 Left Join影响到的是右边的表
 Right Join
-select * from tbl1 Right Join tbl2 where tbl1.ID = tbl2.ID
+select * from tbl1 Right Join tbl2 on tbl1.ID = tbl2.ID
 检索结果是tbl2的所有数据和tbl1中满足where 条件的数据。
 简言之 Right Join影响到的是左边的表。
 </pre>
@@ -100,13 +99,12 @@ where p.BusinessEntityID=e.BusinessEntityID
 <p><img src="http://t2.qpic.cn/mblogpic/63383e1385d04f6457da/460" alt="picture" title=""></p>
 
 <pre>关于左连接和右连接：
-左连接where只影向右表，右连接where只影响左表。
 Left Join
-select * from tbl1 Left Join tbl2 where tbl1.ID = tbl2.ID
+select * from tbl1 Left Join tbl2 on tbl1.ID = tbl2.ID
 左连接后的检索结果是显示tbl1的所有数据和tbl2中满足where 条件的数据。
 简言之 Left Join影响到的是右边的表
 Right Join
-select * from tbl1 Right Join tbl2 where tbl1.ID = tbl2.ID
+select * from tbl1 Right Join tbl2 on tbl1.ID = tbl2.ID
 检索结果是tbl2的所有数据和tbl1中满足where 条件的数据。
 简言之 Right Join影响到的是左边的表。
 </pre>
