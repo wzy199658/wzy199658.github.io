@@ -25,12 +25,88 @@
 	</div>
 <div id="md" style="display: none;">
 <!-- markdown -->
-123456
+开窗函数（OVER子句）用于为行定义一个窗口（这里的窗口是指运算将要操作的行的集合），它对一组值进行操作，不需要使用GROUP BY子句对数据进行分组，能够在同一行中同时返回基础行的列和聚合列。举例来说，如果要得到一个年级所有班级所有学生的平均分，按照传统的写法，肯定是通过AVG聚合函数来实现求平均分。由于聚合函数是以GROUP BY 查询作为操作的上下文对一组值进行聚合，GROUP BY 
+操作对数据进行分组后，查询为每个组只返回一行数据，因此，我们不能同时返回基础列（班级，学生等列），而只能得到聚合列。
+
+开窗函数是在ISO SQL标准中定义的。SQL Server提供排名开窗函数和聚合开窗函数，只有在SELECT和ORDER BY处理阶段才允许使用OVER子句。
+
+以下表为例：
+![picture](http://t2.qpic.cn/mblogpic/085e8f35c142edbc6970/160)
+
+1．聚合开窗函数
+聚合开窗函数使用OVER子句提供窗口作为上下文，对窗口中的一组值进行操作，而不是使用GROUP BY子句提供的上下文。这样就不必对数据进行分组，还能够在同一行中同时返回基础行和聚合列。 带有空的圆括号的OVER子句会提供所有行进行计算（这里的“所有行”并不一定是在FROM子句中出现的那些表中的所有行，而是在FROM
+WHERE、GROUP BY，以及HAVING处理阶段完成后仍然可用的那些行）。例如，对上表进行查询的SELECT子句中指定了Sum(Val) OVER()表达式，这个函数就会对SELECT阶段操作的所有行计算其总价格。如果想对行进行限制或者分区，则可以可以使用PARTITION BY子句。例如，如果想返回当前客户（与当前行具有相同custid的所有行）的总价格，则可以指定Sum(Val) OVER(PARTITION BY custid)。
+<pre>
+select orderid,custid, val, 
+sum(val)over() as totalvalue, 
+sum(val) over(partitionbycustid) as custtotalvalue 
+from OrderValue
+</pre>
+结果如下：
+![picture](http://t2.qpic.cn/mblogpic/91d73f962af457f38242/160)
+
+2．排序开窗函数OVER子句也支持四种排序函数：ROW_NUMBER（行号）、RANK（排名）、DENSE_RANK（密集排名）和NTILE。
+<pre>
+select orderid, custid, val,
+row_number()over(order by val) as rownum, 
+rank()over(order by val)as rank, 
+dense_rank()over(order by val)as dense_rank,
+ntile(6)over(order by val)as ntile 
+from OrderValues 
+order by val
+</pre>
+结果如下：
+![picture](http://t2.qpic.cn/mblogpic/8a69dccb74dce7b7d012/160)
+
+ROW_NUMBER函数用于为结果集中的各行分配递增的序列号，其逻辑顺序由OVER子句中的ORDER BY语句指定。在上面的查询中，逻辑顺序基于val列，随着订单价格的增加，rownum随之增加。
+
+由结果看出，对于val相同的行，其rownum不同。若将orderid为10006和10007在表中的顺序调换，则上述查询结果中，rownum为1的记录的orderid为10008，而10006的rownum为2。对于排序值一样的行，ROW_NUMBER函数也一定会为其生成唯一的行号值。如果想以相同的方式对排序值中的相同值进行更多的处理，可以考虑使用RANK或者DENSE_RANK函数。这2个函数与ROW_NUMBER类似，但它们为相同逻辑排序值的所有行生成相同的排名。RANK和DENSE_RANK的区别在于，RANK表示之前有多少行具有更低的排序值，而DENSE_RANK则表示之前有多少个更低的排序值。例如，在上面的查询结果中，orderid为10007的行，rank值为3，表示有2行记录的val值小于它本身的val，而dense_rank为2，表示只有一个比当前val值1500小的val值（即1200）。
+
+NTILE函数可以将结果中的行关联到组，并为每一行分配一个所属的组的编号。它接收一个表示组的数量的参数，并要在OVER子句中指定逻辑顺序。比如上述查询语句请求将其分为6组，基于val排序，每组的大小为10 / 6 = 1，余数（rownum为7~10的记录）的每一行被分配到最前面的每个组，所以组1~4每个组2行数据，组5~6为1行数据。
 <!-- markdown end -->
 </div>
 <div class="entry" id="main">
 <!-- content -->
-<p>123456</p>
+<p>开窗函数（OVER子句）用于为行定义一个窗口（这里的窗口是指运算将要操作的行的集合），它对一组值进行操作，不需要使用GROUP BY子句对数据进行分组，能够在同一行中同时返回基础行的列和聚合列。举例来说，如果要得到一个年级所有班级所有学生的平均分，按照传统的写法，肯定是通过AVG聚合函数来实现求平均分。由于聚合函数是以GROUP BY 查询作为操作的上下文对一组值进行聚合，GROUP BY 
+操作对数据进行分组后，查询为每个组只返回一行数据，因此，我们不能同时返回基础列（班级，学生等列），而只能得到聚合列。</p>
+
+<p>开窗函数是在ISO SQL标准中定义的。SQL Server提供排名开窗函数和聚合开窗函数，只有在SELECT和ORDER BY处理阶段才允许使用OVER子句。</p>
+
+<p>以下表为例：
+<img src="http://t2.qpic.cn/mblogpic/085e8f35c142edbc6970/160" alt="picture" title=""></p>
+
+<p>1．聚合开窗函数
+聚合开窗函数使用OVER子句提供窗口作为上下文，对窗口中的一组值进行操作，而不是使用GROUP BY子句提供的上下文。这样就不必对数据进行分组，还能够在同一行中同时返回基础行和聚合列。 带有空的圆括号的OVER子句会提供所有行进行计算（这里的“所有行”并不一定是在FROM子句中出现的那些表中的所有行，而是在FROM
+WHERE、GROUP BY，以及HAVING处理阶段完成后仍然可用的那些行）。例如，对上表进行查询的SELECT子句中指定了Sum(Val) OVER()表达式，这个函数就会对SELECT阶段操作的所有行计算其总价格。如果想对行进行限制或者分区，则可以可以使用PARTITION BY子句。例如，如果想返回当前客户（与当前行具有相同custid的所有行）的总价格，则可以指定Sum(Val) OVER(PARTITION BY custid)。</p>
+
+<pre>select orderid,custid, val, 
+sum(val)over() as totalvalue, 
+sum(val) over(partitionbycustid) as custtotalvalue 
+from OrderValue
+</pre>
+
+<p>结果如下：
+<img src="http://t2.qpic.cn/mblogpic/91d73f962af457f38242/160" alt="picture" title=""></p>
+
+<p>2．排序开窗函数OVER子句也支持四种排序函数：ROW<em>NUMBER（行号）、RANK（排名）、DENSE</em>RANK（密集排名）和NTILE。</p>
+
+<pre>select orderid, custid, val,
+row_number()over(order by val) as rownum, 
+rank()over(order by val)as rank, 
+dense_rank()over(order by val)as dense_rank,
+ntile(6)over(order by val)as ntile 
+from OrderValues 
+order by val
+</pre>
+
+<p>结果如下：
+<img src="http://t2.qpic.cn/mblogpic/8a69dccb74dce7b7d012/160" alt="picture" title=""></p>
+
+<p>ROW_NUMBER函数用于为结果集中的各行分配递增的序列号，其逻辑顺序由OVER子句中的ORDER BY语句指定。在上面的查询中，逻辑顺序基于val列，随着订单价格的增加，rownum随之增加。</p>
+
+<p>由结果看出，对于val相同的行，其rownum不同。若将orderid为10006和10007在表中的顺序调换，则上述查询结果中，rownum为1的记录的orderid为10008，而10006的rownum为2。对于排序值一样的行，ROW<em>NUMBER函数也一定会为其生成唯一的行号值。如果想以相同的方式对排序值中的相同值进行更多的处理，可以考虑使用RANK或者DENSE</em>RANK函数。这2个函数与ROW<em>NUMBER类似，但它们为相同逻辑排序值的所有行生成相同的排名。RANK和DENSE</em>RANK的区别在于，RANK表示之前有多少行具有更低的排序值，而DENSE<em>RANK则表示之前有多少个更低的排序值。例如，在上面的查询结果中，orderid为10007的行，rank值为3，表示有2行记录的val值小于它本身的val，而dense</em>rank为2，表示只有一个比当前val值1500小的val值（即1200）。</p>
+
+<p>NTILE函数可以将结果中的行关联到组，并为每一行分配一个所属的组的编号。它接收一个表示组的数量的参数，并要在OVER子句中指定逻辑顺序。比如上述查询语句请求将其分为6组，基于val排序，每组的大小为10 / 6 = 1，余数（rownum为7~10的记录）的每一行被分配到最前面的每个组，所以组1~4每个组2行数据，组5~6为1行数据。</p>
 <!-- content end -->
 </div>
 <br>
